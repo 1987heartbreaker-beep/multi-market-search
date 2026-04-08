@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>フリマ・EC 相場チェッカー</title>
+  <style>
+    /* ===== ベース ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+                   "Hiragino Sans", "BIZ UDPGothic", Arial, sans-serif;
+      min-height: 100vh;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    /* ===== カード全体 ===== */
+    .card {
+      width: 100%;
+      max-width: 640px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 40px rgba(0,0,0,.10);
+      overflow: hidden;
+    }
+
+    /* ===== ヘッダー ===== */
+    .card-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      padding: 2rem 2rem 1.8rem;
+      text-align: center;
+      position: relative;
+    }
+    .card-header::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #e53935, #ff9800, #43a047, #1e88e5, #8e24aa);
+    }
+    .card-header h1 {
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: .35rem;
+    }
+    .card-header p {
+      color: rgba(255,255,255,.6);
+      font-size: .8rem;
+    }
+
+    /* ===== 検索エリア ===== */
+    .search-area {
+      padding: 1.8rem 1.8rem 0;
+    }
+    .input-wrap {
+      display: flex;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .input-wrap:focus-within {
+      border-color: #1e88e5;
+      box-shadow: 0 0 0 3px rgba(30,136,229,.12);
+    }
+    .input-wrap input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: .85rem 1.1rem;
+      font-size: 1rem;
+      color: #1a1a2e;
+      background: transparent;
+    }
+    .input-wrap input::placeholder { color: #bbb; }
+    .btn-clear {
+      border: none;
+      background: none;
+      padding: 0 .9rem;
+      color: #bbb;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: color .15s;
+      display: none;
+    }
+    .btn-clear:hover { color: #888; }
+    .btn-clear.visible { display: block; }
+
+    /* ===== 全サイト一斉ボタン ===== */
+    .open-all-wrap {
+      padding: 1rem 1.8rem 0;
+    }
+    .btn-open-all {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: .78rem 1rem;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(135deg, #1e88e5, #1565c0);
+      color: #fff;
+      letter-spacing: .02em;
+      transition: opacity .2s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+    .btn-open-all:hover  { opacity: .9; }
+    .btn-open-all:active { transform: scale(.98); }
+    .btn-open-all:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ===== 区切り ===== */
+    .divider {
+      margin: 1.4rem 1.8rem .6rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      color: #bbb;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #ebebeb;
+    }
+
+    /* ===== サイトボタングリッド ===== */
+    .sites-grid {
+      padding: 0 1.8rem 1.8rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+    }
+
+    .site-btn {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      border: 1.5px solid transparent;
+      border-radius: 11px;
+      padding: .75rem 1rem;
+      cursor: pointer;
+      background: #f8f9fb;
+      transition: background .18s, border-color .18s, transform .1s, box-shadow .18s;
+      text-decoration: none;
+      color: #1a1a2e;
+    }
+    .site-btn:hover {
+      background: var(--c-light);
+      border-color: var(--c-main);
+      box-shadow: 0 2px 12px var(--c-shadow);
+    }
+    .site-btn:active { transform: scale(.97); }
+    .site-btn:focus-visible { outline: 2px solid var(--c-main); outline-offset: 2px; }
+    .site-btn.disabled { opacity: .4; pointer-events: none; }
+
+    .site-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      background: var(--c-main);
+      flex-shrink: 0;
+    }
+    .site-info { line-height: 1.2; }
+    .site-name  { font-weight: 700; font-size: .88rem; }
+    .site-label { font-size: .68rem; color: #999; margin-top: .1rem; }
+
+    /* 各サイトのカラー変数 */
+    .site-mercari     { --c-main: #ff0211; --c-light: #fff5f5; --c-shadow: rgba(255,2,17,.10); }
+    .site-yahooauction{ --c-main: #ff0033; --c-light: #fff5f7; --c-shadow: rgba(255,0,51,.10); }
+    .site-amazon      { --c-main: #ff9900; --c-light: #fffbf0; --c-shadow: rgba(255,153,0,.12); }
+    .site-bookoff     { --c-main: #f7a800; --c-light: #fffcf0; --c-shadow: rgba(247,168,0,.12); }
+    .site-rakuma      { --c-main: #f0522c; --c-light: #fff5f3; --c-shadow: rgba(240,82,44,.10); }
+
+    /* アイコン背景を少し薄く */
+    .site-mercari      .site-icon { background: #fff0f0; }
+    .site-yahooauction .site-icon { background: #fff0f3; }
+    .site-amazon       .site-icon { background: #fff8e8; }
+    .site-bookoff      .site-icon { background: #fffae8; }
+    .site-rakuma       .site-icon { background: #fff0ec; }
+
+    /* ===== トースト ===== */
+    #toast {
+      position: fixed;
+      bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(12px);
+      background: #323232;
+      color: #fff;
+      padding: .6rem 1.4rem;
+      border-radius: 50px;
+      font-size: .85rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ===== フッター ===== */
+    footer {
+      margin-top: 1.6rem;
+      font-size: .75rem;
+      color: #bbb;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    /* ===== レスポンシブ ===== */
+    @media (max-width: 420px) {
+      .sites-grid { grid-template-columns: 1fr; }
+      .card-header h1 { font-size: 1.15rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- ヘッダー -->
+  <div class="card-header">
+    <h1>🔍 フリマ・EC 相場チェッカー</h1>
+    <p>キーワードを入力 → 各サイトの中古相場を一括チェック</p>
+  </div>
+
+  <!-- 検索入力 -->
+  <div class="search-area">
+    <div class="input-wrap">
+      <input
+        type="text"
+        id="query"
+        placeholder="例：Nintendo Switch、iPhone 15、ワンピース 1巻"
+        autocomplete="off"
+        autofocus
+      />
+      <button class="btn-clear" id="btn-clear" title="クリア" onclick="clearInput()">✕</button>
+    </div>
+  </div>
+
+  <!-- 全サイト一斉開く -->
+  <div class="open-all-wrap">
+    <button class="btn-open-all" id="btn-open-all" onclick="openAll()" disabled>
+      <span>🚀</span>
+      <span>5サイトを一斉に別タブで開く</span>
+    </button>
+  </div>
+
+  <!-- 区切り -->
+  <div class="divider">各サイトで検索</div>
+
+  <!-- サイトボタン -->
+  <div class="sites-grid">
+
+    <a class="site-btn site-mercari disabled" id="btn-mercari"
+       href="#" target="_blank" rel="noopener noreferrer">
+      <div class="site-icon">🛍️</div>
+      <div class="site-info">
+        <div class="site-name">メルカリ</div>
+        <div class="site-label">販売中のみ表示</div>
+      </div>
+    </a>
+
+    <a class="site-btn site-yahooauction disabled" id="btn-yahooauction"
+       href="#" target="_blank" rel="noopener noreferrer">
+      <div class="site-icon">🔨</div>
+      <div class="site-info">
+        <div class="site-name">ヤフオク</div>
+        <div class="site-label">中古フィルタ適用</div>
+      </div>
+    </a>
+
+    <a class="site-btn site-amazon disabled" id="btn-amazon"
+       href="#" target="_blank" rel="noopener noreferrer">
+      <div class="site-icon">📦</div>
+      <div class="site-info">
+        <div class="site-name">Amazon</div>
+        <div class="site-label">中古品のみ表示</div>
+      </div>
+    </a>
+
+    <a class="site-btn site-bookoff disabled" id="btn-bookoff"
+       href="#" target="_blank" rel="noopener noreferrer">
+      <div class="site-icon">📚</div>
+      <div class="site-info">
+        <div class="site-name">ブックオフ</div>
+        <div class="site-label">公式検索</div>
+      </div>
+    </a>
+
+    <a class="site-btn site-rakuma disabled" id="btn-rakuma"
+       href="#" target="_blank" rel="noopener noreferrer"
+       style="grid-column: 1 / -1;">
+      <div class="site-icon">🏷️</div>
+      <div class="site-info">
+        <div class="site-name">ラクマ</div>
+        <div class="site-label">販売中のみ表示</div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<footer>
+  ※ 各ボタンをクリックすると対応サイトの検索結果ページが新しいタブで開きます。<br>
+  スクレイピングは行いません。価格情報は各サイトでご確認ください。
+</footer>
+
+<div id="toast"></div>
+
+<script>
+  /* ===== URL ビルダー ===== */
+  function buildUrls(q) {
+    const enc = encodeURIComponent(q);
+    return {
+      mercari:      `https://jp.mercari.com/search?keyword=${enc}&status=on_sale`,
+      yahooauction: `https://auctions.yahoo.co.jp/search/search?p=${enc}&istatus=2&ei=UTF-8`,
+      amazon:       `https://www.amazon.co.jp/s?k=${enc}&rh=p_n_condition-type%3A2224238051`,
+      bookoff:      `https://www.bookoffonline.co.jp/items/search?keyword=${enc}`,
+      rakuma:       `https://fril.jp/search?query=${enc}&transaction=selling`,
+    };
+  }
+
+  /* ===== 入力監視 ===== */
+  const queryInput = document.getElementById("query");
+  const btnClear   = document.getElementById("btn-clear");
+  const btnOpenAll = document.getElementById("btn-open-all");
+  const SITE_IDS   = ["mercari", "yahooauction", "amazon", "bookoff", "rakuma"];
+
+  queryInput.addEventListener("input", onInput);
+  queryInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") openAll();
+  });
+
+  function onInput() {
+    const q = queryInput.value.trim();
+    const hasQuery = q.length > 0;
+
+    btnClear.classList.toggle("visible", hasQuery);
+    btnOpenAll.disabled = !hasQuery;
+
+    const urls = hasQuery ? buildUrls(q) : null;
+    SITE_IDS.forEach(id => {
+      const el = document.getElementById(`btn-${id}`);
+      if (hasQuery) {
+        el.href = urls[id];
+        el.classList.remove("disabled");
+      } else {
+        el.href = "#";
+        el.classList.add("disabled");
+      }
+    });
+  }
+
+  /* ===== クリア ===== */
+  function clearInput() {
+    queryInput.value = "";
+    queryInput.focus();
+    onInput();
+  }
+
+  /* ===== 全サイト一斉オープン ===== */
+  function openAll() {
+    const q = queryInput.value.trim();
+    if (!q) return;
+
+    const urls = buildUrls(q);
+
+    // ポップアップブロック対策:
+    // window.open() をクリックハンドラの同期コンテキスト内でまとめて呼ぶ。
+    // setTimeout で遅延させるとブロックされるため使用しない。
+    SITE_IDS.forEach(id => {
+      window.open(urls[id], `_market_${id}`);
+    });
+
+    showToast(`✅ ${SITE_IDS.length}つのタブを開きました`);
+  }
+
+  /* ===== トースト ===== */
+  let toastTimer;
+  function showToast(msg) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+  }
+</script>
+</body>
+</html>
