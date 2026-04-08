@@ -7,7 +7,8 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Hiragino Sans", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+                   "Hiragino Sans", "BIZ UDPGothic", Arial, sans-serif;
       min-height: 100vh;
       background: #f0f2f5;
       display: flex;
@@ -15,45 +16,80 @@
       align-items: center;
       padding: 2.5rem 1rem 4rem;
     }
+
     .card {
       width: 100%;
-      max-width: 640px;
+      max-width: 560px;
       background: #fff;
       border-radius: 20px;
       box-shadow: 0 4px 40px rgba(0,0,0,.10);
       overflow: hidden;
     }
+
     .card-header {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
       padding: 2rem 2rem 1.8rem;
       text-align: center;
       position: relative;
     }
+    .card-header::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #e53935, #ff0033, #ff9900);
+    }
     .card-header h1 {
       color: #fff;
       font-size: 1.35rem;
       font-weight: 800;
+      letter-spacing: -.02em;
       margin-bottom: .35rem;
     }
     .card-header p {
       color: rgba(255,255,255,.6);
       font-size: .8rem;
     }
-    .search-area { padding: 1.8rem 1.8rem 0; }
+
+    .search-area {
+      padding: 1.8rem 1.8rem 0;
+    }
     .input-wrap {
       display: flex;
       border: 2px solid #e0e0e0;
       border-radius: 12px;
       overflow: hidden;
+      transition: border-color .2s;
+    }
+    .input-wrap:focus-within {
+      border-color: #1e88e5;
+      box-shadow: 0 0 0 3px rgba(30,136,229,.12);
     }
     .input-wrap input {
       flex: 1;
       border: none;
       outline: none;
       padding: .85rem 1.1rem;
-      font-size: 16px; /* iPhoneでズームされないサイズ */
+      font-size: 1rem;
+      color: #1a1a2e;
+      background: transparent;
     }
-    .open-all-wrap { padding: 1rem 1.8rem 0; }
+    .input-wrap input::placeholder { color: #bbb; }
+    .btn-clear {
+      border: none;
+      background: none;
+      padding: 0 .9rem;
+      color: #bbb;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: color .15s;
+      display: none;
+    }
+    .btn-clear:hover { color: #888; }
+    .btn-clear.visible { display: block; }
+
+    .open-all-wrap {
+      padding: 1rem 1.8rem 0;
+    }
     .btn-open-all {
       width: 100%;
       border: none;
@@ -61,83 +97,215 @@
       padding: .78rem 1rem;
       font-size: .95rem;
       font-weight: 700;
+      cursor: pointer;
       background: linear-gradient(135deg, #1e88e5, #1565c0);
       color: #fff;
-      cursor: pointer;
+      letter-spacing: .02em;
+      transition: opacity .2s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
     }
-    .btn-open-all:disabled { opacity: .4; }
+    .btn-open-all:hover  { opacity: .9; }
+    .btn-open-all:active { transform: scale(.98); }
+    .btn-open-all:disabled { opacity: .4; cursor: not-allowed; }
+
+    .divider {
+      margin: 1.4rem 1.8rem .6rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      color: #bbb;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #ebebeb;
+    }
+
     .sites-grid {
-      padding: 1.8rem;
+      padding: 0 1.8rem 1.8rem;
       display: grid;
       grid-template-columns: 1fr;
       gap: .75rem;
     }
+
     .site-btn {
       display: flex;
       align-items: center;
       gap: .65rem;
+      border: 1.5px solid transparent;
       border-radius: 11px;
-      padding: .75rem 1rem;
+      padding: .85rem 1.1rem;
+      cursor: pointer;
       background: #f8f9fb;
+      transition: background .18s, border-color .18s, transform .1s, box-shadow .18s;
       text-decoration: none;
       color: #1a1a2e;
     }
+    .site-btn:hover {
+      background: var(--c-light);
+      border-color: var(--c-main);
+      box-shadow: 0 2px 12px var(--c-shadow);
+    }
+    .site-btn:active { transform: scale(.97); }
+    .site-btn:focus-visible { outline: 2px solid var(--c-main); outline-offset: 2px; }
     .site-btn.disabled { opacity: .4; pointer-events: none; }
-    .site-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-    .site-name { font-weight: 700; font-size: .88rem; }
-    /* サイト別カラー */
-    .site-mercari { border-left: 5px solid #ff0211; }
-    .site-yahoo { border-left: 5px solid #ff0033; }
-    .site-amazon { border-left: 5px solid #ff9900; }
+
+    .site-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+    .site-info { line-height: 1.25; }
+    .site-name  { font-weight: 700; font-size: .95rem; }
+    .site-label { font-size: .72rem; color: #999; margin-top: .15rem; }
+
+    .site-mercari     { --c-main: #ff0211; --c-light: #fff5f5; --c-shadow: rgba(255,2,17,.10); }
+    .site-yahooauction{ --c-main: #ff0033; --c-light: #fff5f7; --c-shadow: rgba(255,0,51,.10); }
+    .site-amazon      { --c-main: #ff9900; --c-light: #fffbf0; --c-shadow: rgba(255,153,0,.12); }
+
+    .site-mercari      .site-icon { background: #fff0f0; }
+    .site-yahooauction .site-icon { background: #fff0f3; }
+    .site-amazon       .site-icon { background: #fff8e8; }
+
+    #toast {
+      position: fixed;
+      bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(12px);
+      background: #323232;
+      color: #fff;
+      padding: .6rem 1.4rem;
+      border-radius: 50px;
+      font-size: .85rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    footer {
+      margin-top: 1.6rem;
+      font-size: .75rem;
+      color: #bbb;
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 420px) {
+      .card-header h1 { font-size: 1.15rem; }
+    }
   </style>
 </head>
 <body>
+
 <div class="card">
+
   <div class="card-header">
-    <h1>🔍 相場一括チェッカー</h1>
-    <p>キーワードを入力して3サイトを同時検索</p>
+    <h1>🔍 フリマ・EC 相場チェッカー</h1>
+    <p>キーワードを入力 → 各サイトの中古相場を一括チェック</p>
   </div>
+
   <div class="search-area">
     <div class="input-wrap">
-      <input type="text" id="query" placeholder="商品名を入力" autocomplete="off" autofocus />
+      <input
+        type="text"
+        id="query"
+        placeholder="例：Nintendo Switch、iPhone 15、AirPods Pro"
+        autocomplete="off"
+        autofocus
+      />
+      <button class="btn-clear" id="btn-clear" title="クリア" onclick="clearInput()">✕</button>
     </div>
   </div>
+
   <div class="open-all-wrap">
     <button class="btn-open-all" id="btn-open-all" onclick="openAll()" disabled>
-      🚀 3サイトを一斉に開く
+      <span>🚀</span>
+      <span>3サイトを一斉に別タブで開く</span>
     </button>
   </div>
+
+  <div class="divider">各サイトで検索</div>
+
   <div class="sites-grid">
-    <a class="site-btn site-mercari disabled" id="btn-mercari" href="#" target="_blank">
-      <div class="site-icon">🛍️</div><div class="site-name">メルカリ</div>
+
+    <a class="site-btn site-mercari disabled" id="btn-mercari"
+       href="#" target="_blank" rel="noopener noreferrer">
+      <div class="site-icon">🛍️</div>
+      <div class="site-info">
+        <div class="site-name">メルカリ</div>
+        <div class="site-label">販売中のみ表示</div>
+      </div>
     </a>
-    <a class="site-btn site-yahoo disabled" id="btn-yahoo" href="#" target="_blank">
-      <div class="site-icon">🔨</div><div class="site-name">ヤフオク</div>
+
+    <a class="site-btn site-yahooauction disabled" id="btn-yahooauction"
+       href="#" target="_blank" rel="noopener noreferrer">
+      <div class="site-icon">🔨</div>
+      <div class="site-info">
+        <div class="site-name">ヤフオク</div>
+        <div class="site-label">中古フィルタ適用</div>
+      </div>
     </a>
-    <a class="site-btn site-amazon disabled" id="btn-amazon" href="#" target="_blank">
-      <div class="site-icon">📦</div><div class="site-name">Amazon</div>
+
+    <a class="site-btn site-amazon disabled" id="btn-amazon"
+       href="#" target="_blank" rel="noopener noreferrer">
+      <div class="site-icon">📦</div>
+      <div class="site-info">
+        <div class="site-name">Amazon</div>
+        <div class="site-label">中古品のみ表示</div>
+      </div>
     </a>
+
   </div>
 </div>
 
-<script>
-  const queryInput = document.getElementById("query");
-  const btnOpenAll = document.getElementById("btn-open-all");
-  const SITE_IDS = ["mercari", "yahoo", "amazon"];
+<footer>
+  ※ 各ボタンをクリックすると対応サイトの検索結果ページが新しいタブで開きます。<br>
+  スクレイピングは行いません。価格情報は各サイトでご確認ください。
+</footer>
 
+<div id="toast"></div>
+
+<script>
   function buildUrls(q) {
     const enc = encodeURIComponent(q);
     return {
-      mercari: `https://jp.mercari.com/search?keyword=${enc}&status=on_sale`,
-      yahoo:   `https://auctions.yahoo.co.jp/search/search?p=${enc}&istatus=2`,
-      amazon:  `https://www.amazon.co.jp/s?k=${enc}&rh=p_n_condition-type%3A2224238051`
+      mercari:      `https://jp.mercari.com/search?keyword=${enc}&status=on_sale`,
+      yahooauction: `https://auctions.yahoo.co.jp/search/search?p=${enc}&istatus=2&ei=UTF-8`,
+      amazon:       `https://www.amazon.co.jp/s?k=${enc}&rh=p_n_condition-type%3A2224238051`,
     };
   }
 
-  queryInput.addEventListener("input", () => {
+  const queryInput = document.getElementById("query");
+  const btnClear   = document.getElementById("btn-clear");
+  const btnOpenAll = document.getElementById("btn-open-all");
+  const SITE_IDS   = ["mercari", "yahooauction", "amazon"];
+
+  queryInput.addEventListener("input", onInput);
+  queryInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") openAll();
+  });
+
+  function onInput() {
     const q = queryInput.value.trim();
     const hasQuery = q.length > 0;
+
+    btnClear.classList.toggle("visible", hasQuery);
     btnOpenAll.disabled = !hasQuery;
+
     const urls = hasQuery ? buildUrls(q) : null;
     SITE_IDS.forEach(id => {
       const el = document.getElementById(`btn-${id}`);
@@ -149,13 +317,35 @@
         el.classList.add("disabled");
       }
     });
-  });
+  }
+
+  function clearInput() {
+    queryInput.value = "";
+    queryInput.focus();
+    onInput();
+  }
 
   function openAll() {
     const q = queryInput.value.trim();
     if (!q) return;
+
     const urls = buildUrls(q);
-    SITE_IDS.forEach(id => window.open(urls[id], `_market_${id}`));
+
+    // ポップアップブロック対策: setTimeout を使わず同期的に呼ぶ
+    SITE_IDS.forEach(id => {
+      window.open(urls[id], `_market_${id}`);
+    });
+
+    showToast(`✅ ${SITE_IDS.length}つのタブを開きました`);
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
   }
 </script>
 </body>
