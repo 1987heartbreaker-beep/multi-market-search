@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>フリマ・EC 相場チェッカー</title>
   <style>
-    /* ===== ベース ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
@@ -18,7 +17,6 @@
       padding: 2.5rem 1rem 4rem;
     }
 
-    /* ===== カード全体 ===== */
     .card {
       width: 100%;
       max-width: 640px;
@@ -28,7 +26,6 @@
       overflow: hidden;
     }
 
-    /* ===== ヘッダー ===== */
     .card-header {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
       padding: 2rem 2rem 1.8rem;
@@ -53,7 +50,6 @@
       font-size: .8rem;
     }
 
-    /* ===== 検索エリア ===== */
     .search-area {
       padding: 1.8rem 1.8rem 0;
     }
@@ -91,7 +87,6 @@
     .btn-clear:hover { color: #888; }
     .btn-clear.visible { display: block; }
 
-    /* ===== 全サイト一斉ボタン ===== */
     .open-all-wrap {
       padding: 1rem 1.8rem 0;
     }
@@ -116,7 +111,6 @@
     .btn-open-all:active { transform: scale(.98); }
     .btn-open-all:disabled { opacity: .4; cursor: not-allowed; }
 
-    /* ===== 区切り ===== */
     .divider {
       margin: 1.4rem 1.8rem .6rem;
       display: flex;
@@ -135,7 +129,6 @@
       background: #ebebeb;
     }
 
-    /* ===== サイトボタングリッド ===== */
     .sites-grid {
       padding: 0 1.8rem 1.8rem;
       display: grid;
@@ -170,28 +163,24 @@
       border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       font-size: 1.25rem;
-      background: var(--c-main);
       flex-shrink: 0;
     }
     .site-info { line-height: 1.2; }
     .site-name  { font-weight: 700; font-size: .88rem; }
     .site-label { font-size: .68rem; color: #999; margin-top: .1rem; }
 
-    /* 各サイトのカラー変数 */
     .site-mercari     { --c-main: #ff0211; --c-light: #fff5f5; --c-shadow: rgba(255,2,17,.10); }
     .site-yahooauction{ --c-main: #ff0033; --c-light: #fff5f7; --c-shadow: rgba(255,0,51,.10); }
     .site-amazon      { --c-main: #ff9900; --c-light: #fffbf0; --c-shadow: rgba(255,153,0,.12); }
     .site-bookoff     { --c-main: #f7a800; --c-light: #fffcf0; --c-shadow: rgba(247,168,0,.12); }
     .site-rakuma      { --c-main: #f0522c; --c-light: #fff5f3; --c-shadow: rgba(240,82,44,.10); }
 
-    /* アイコン背景を少し薄く */
     .site-mercari      .site-icon { background: #fff0f0; }
     .site-yahooauction .site-icon { background: #fff0f3; }
     .site-amazon       .site-icon { background: #fff8e8; }
     .site-bookoff      .site-icon { background: #fffae8; }
     .site-rakuma       .site-icon { background: #fff0ec; }
 
-    /* ===== トースト ===== */
     #toast {
       position: fixed;
       bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(12px);
@@ -211,7 +200,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* ===== フッター ===== */
     footer {
       margin-top: 1.6rem;
       font-size: .75rem;
@@ -220,7 +208,6 @@
       line-height: 1.7;
     }
 
-    /* ===== レスポンシブ ===== */
     @media (max-width: 420px) {
       .sites-grid { grid-template-columns: 1fr; }
       .card-header h1 { font-size: 1.15rem; }
@@ -231,13 +218,11 @@
 
 <div class="card">
 
-  <!-- ヘッダー -->
   <div class="card-header">
     <h1>🔍 フリマ・EC 相場チェッカー</h1>
     <p>キーワードを入力 → 各サイトの中古相場を一括チェック</p>
   </div>
 
-  <!-- 検索入力 -->
   <div class="search-area">
     <div class="input-wrap">
       <input
@@ -251,7 +236,6 @@
     </div>
   </div>
 
-  <!-- 全サイト一斉開く -->
   <div class="open-all-wrap">
     <button class="btn-open-all" id="btn-open-all" onclick="openAll()" disabled>
       <span>🚀</span>
@@ -259,10 +243,8 @@
     </button>
   </div>
 
-  <!-- 区切り -->
   <div class="divider">各サイトで検索</div>
 
-  <!-- サイトボタン -->
   <div class="sites-grid">
 
     <a class="site-btn site-mercari disabled" id="btn-mercari"
@@ -322,7 +304,6 @@
 <div id="toast"></div>
 
 <script>
-  /* ===== URL ビルダー ===== */
   function buildUrls(q) {
     const enc = encodeURIComponent(q);
     return {
@@ -334,7 +315,6 @@
     };
   }
 
-  /* ===== 入力監視 ===== */
   const queryInput = document.getElementById("query");
   const btnClear   = document.getElementById("btn-clear");
   const btnOpenAll = document.getElementById("btn-open-all");
@@ -365,23 +345,19 @@
     });
   }
 
-  /* ===== クリア ===== */
   function clearInput() {
     queryInput.value = "";
     queryInput.focus();
     onInput();
   }
 
-  /* ===== 全サイト一斉オープン ===== */
   function openAll() {
     const q = queryInput.value.trim();
     if (!q) return;
 
     const urls = buildUrls(q);
 
-    // ポップアップブロック対策:
-    // window.open() をクリックハンドラの同期コンテキスト内でまとめて呼ぶ。
-    // setTimeout で遅延させるとブロックされるため使用しない。
+    // ポップアップブロック対策: setTimeout を使わず同期的に呼ぶ
     SITE_IDS.forEach(id => {
       window.open(urls[id], `_market_${id}`);
     });
@@ -389,7 +365,6 @@
     showToast(`✅ ${SITE_IDS.length}つのタブを開きました`);
   }
 
-  /* ===== トースト ===== */
   let toastTimer;
   function showToast(msg) {
     const el = document.getElementById("toast");
