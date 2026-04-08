@@ -1,20 +1,17 @@
-# 1. プロジェクトフォルダへ移動（保存場所に合わせて変更してください）
-cd ~/Downloads/multi-market-search
+"""
+multi-market-search / app.py
+メタ検索方式 – スクレイピングなし、URL生成のみ
+"""
 
-# 2. Git を初期化
-git init
+from flask import Flask, render_template
 
-# 3. ファイルをすべてステージング
-git add .
+app = Flask(__name__)
 
-# 4. 最初のコミット
-git commit -m "first commit"
 
-# 5. ブランチ名を main に設定
-git branch -M main
+@app.route("/")
+def index():
+    return render_template("index.html")
 
-# 6. GitHub のリポジトリと紐付け
-git remote add origin https://github.com/1987heartbreaker-beep/multi-market-search.git
 
-# 7. プッシュ
-git push -u origin main
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
